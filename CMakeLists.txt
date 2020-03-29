@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+
 set(ARCH "x86_64")
+set(CMAKE_CXX_STANDARD 20)
 
 if(WIN32 OR WIN64)
 	add_definitions(-DWINDOWS)
@@ -11,8 +13,10 @@ if(WIN32 OR WIN64)
 		message(STATUS "Hardening disabled for debug build")
 	endif()
 elseif(UNIX)
+	message(STATUS "Linux is not currently supported")
 	add_definitions(-DLINUX)
 elseif(APPLE)
+	message(STATUS "OSX is not supported")
 	add_definitions(-DOSX)
 endif()
 
@@ -26,25 +30,32 @@ endif()
 
 add_subdirectory(libcommons)
 include_directories("libcommons/src/")
-add_subdirectory(SDL2)
-include_directories("SDL2/include/")
 
-set(LIBS SDL2 commons
+set(LIBS
+		commons
+		"${CMAKE_CURRENT_SOURCE_DIR}/libs/libSDL2.dll.a"
 		"${CMAKE_CURRENT_SOURCE_DIR}/libs/libvorbis.a"
 		"${CMAKE_CURRENT_SOURCE_DIR}/libs/libogg.a"
-		"${CMAKE_CURRENT_SOURCE_DIR}/libs/libopusfile.a"
-		"${CMAKE_CURRENT_SOURCE_DIR}/libs/libopus.a"
 		"${CMAKE_CURRENT_SOURCE_DIR}/libs/libpng.a"
 		"${CMAKE_CURRENT_SOURCE_DIR}/libs/libz.a"
 		"${CMAKE_CURRENT_SOURCE_DIR}/libs/libzstd.a")
 
-project(LoftEngine)
-set(CMAKE_CXX_STANDARD 20)
 set(SRC
 		src/glad.c
-
+		
 		src/api/render/framebuffer.cc
 		src/api/render/framebuffer.hh
+		src/api/render/shader.cc src/api/render/shader.hh
+		src/api/render/mesh.cc src/api/render/mesh.hh
+		src/api/assets/models.cc src/api/assets/models.hh
+		src/api/assets/asa.cc src/api/assets/asa.hh
+		src/api/assets/camera.cc src/api/assets/camera.hh
+		src/api/assets/audio.cc src/api/assets/audio.hh
+		src/api/render/renderPass.hh
+		src/api/render/renderList.hh
+		src/api/render/atlas.cc src/api/render/atlas.hh
+		src/api/render/texture.cc src/api/render/texture.hh
+		src/api/assets/pngw.cc src/api/assets/pngw.hh
 		
 		src/main.cc
 		src/loft.cc src/loft.hh
@@ -52,26 +63,16 @@ set(SRC
 		src/events.cc src/events.hh
 		src/input.cc src/input.hh
 		src/global.cc src/global.hh
-		src/api/render/atlas.cc src/api/render/atlas.hh
-		src/api/render/texture.cc src/api/render/texture.hh
-		src/api/assets/pngw.cc src/api/assets/pngw.hh
 		src/bsp.hh
 		src/assets.cc src/assets.hh
-		src/api/render/shader.cc src/api/render/shader.hh
-		src/api/render/mesh.cc src/api/render/mesh.hh
-		src/api/assets/models.cc src/api/assets/models.hh
-		src/util.cc src/util.hh
-		src/api/assets/asa.cc src/api/assets/asa.hh
-		src/api/assets/camera.cc src/api/assets/camera.hh
-		src/api/assets/audio.cc src/api/assets/audio.hh
-		src/api/render/renderPass.hh
-		src/api/render/renderList.hh
 		src/renderer.cc src/renderer.hh
 		src/color.cc src/color.hh
 		src/postStack.cc src/postStack.hh
 		src/object.cc src/object.hh
 		src/components.cc src/components.hh
-		src/gl.cc src/gl.hh)
+		src/util.cc src/util.hh src/world.cc src/world.hh)
+
+project(LoftEngine)
 include_directories(include)
 add_executable(${PROJECT_NAME} ${SRC})
 target_link_libraries(${PROJECT_NAME} ${LIBS})

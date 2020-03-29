@@ -12,9 +12,9 @@ struct Camera
 	void update();
 	
 	///Get the view matrix this camera represents
-	[[nodiscard]] mat4x4<float> getViewMatrix();
+	[[nodiscard]] mat4x4<float> getViewMatrix() const;
 	
-	[[nodiscard]] mat4x4<float> getOrthoProjectionMatrix();
+	[[nodiscard]] mat4x4<float> getOrthoProjectionMatrix() const;
 	
 	///Pan the camera relative to its current position
 	void move(double x, double y);

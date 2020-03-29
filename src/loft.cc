@@ -3,7 +3,7 @@
 #include "global.hh"
 
 #define SDL_MAIN_HANDLED
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <glad/glad.h>
 #include <commons/logger.hh>
 
@@ -45,8 +45,14 @@ void glDebug(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei len
 	logger << Sev::ERR << "An OpenGL error occured: " << sev << ", ID: " << id << ", " << ty << ", Message: " << message << logger.endl();
 }
 
-Loft::Loft(uint32_t width, uint32_t height, std::string const &windowTitle, bool resizable, bool startMaximized) : width(width), height(height), windowTitle(windowTitle), resizable(resizable), startMaximized(startMaximized)
+Loft::Loft(uint32_t width, uint32_t height, std::string const &windowTitle, bool resizable, bool startMaximized)
 {
+	this->width = width;
+	this->height = height;
+	this->windowTitle = windowTitle;
+	this->resizable = resizable;
+	this->startMaximized = startMaximized;
+	
 	this->eventBus = MU<EventBus_t>();
 	this->input = MU<Input>();
 	
@@ -83,8 +89,9 @@ Loft::Loft(uint32_t width, uint32_t height, std::string const &windowTitle, bool
 	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glViewport(0, 0, width, height);
-	this->renderer = MU<Renderer>(eventBus, width, height);
+	glViewport(0, 0, this->width, this->height);
+	glScissor(0, 0, this->width, this->height);
+	this->renderer = MU<Renderer>(this->eventBus, this->width, this->height);
 	
 	eventBus->registerEventHandler<EventWindowSizeChanged>([this](uint32_t newWidth, uint32_t newHeight)
 	{
@@ -97,14 +104,16 @@ Loft::~Loft()
 {
 	this->input.reset();
 	this->eventBus.reset();
+	this->renderer.reset();
 }
 
 void Loft::update(double delta)
 {
-	//this->activeScene->update(delta);
+	this->world.update(delta);
 }
 
 void Loft::renderFrame()
 {
-	
+	this->renderer->render({}, this->camera);
+	SDL_GL_SwapWindow(reinterpret_cast<SDL_Window*>(this->window));
 }

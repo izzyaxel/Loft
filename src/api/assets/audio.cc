@@ -2,7 +2,6 @@
 
 #include <ogg/ogg.h>
 #include <vorbis/codec.h>
-#include <opusfile.h>
 #include <commons/dataBuffer.hh>
 #include <commons/fileio.hh>
 #include <cstring>
@@ -42,10 +41,6 @@ AudioInfo decodeAudio(std::vector<uint8_t> const &input, std::string const &file
 {
 	AudioInfo out{std::vector<int16_t>{}, 0, 0, 0, AudioFormat::NONE};
 	out = fromOGG(input, fileName);
-	if(out.format == AudioFormat::NONE || out.bitsPerSample == 0 || out.numChannels == 0 || out.sampleRate == 0 || out.samples.empty())
-	{
-		out = fromOpus(input, fileName);
-	}
 	if(out.format == AudioFormat::NONE || out.bitsPerSample == 0 || out.numChannels == 0 || out.sampleRate == 0 || out.samples.empty())
 	{
 		out = fromWAV(input, fileName);
@@ -548,32 +543,4 @@ AudioInfo fromOGG(std::vector<uint8_t> const &input, std::string const &fileName
 	}
 	auto tmp = reinterpret_cast<int16_t *>(output.data());
 	return AudioInfo{std::vector<int16_t>{tmp, tmp + (output.size() / 2)}, numChannels, bitsPerSample, sampleRate, AudioFormat::OGG};
-}
-
-AudioInfo fromOpus(std::vector<uint8_t> const &input, std::string const &fileName)
-{
-	AudioInfo out{std::vector<int16_t>{}, 0, 0, 0, AudioFormat::NONE};
-	int32_t err = 0;
-	OggOpusFile *opFile = op_open_memory(input.data(), input.size(), &err);
-	int64_t streamSize = op_pcm_total(opFile, -1), bytesRead = 0;
-	out.numChannels = (int16_t)op_channel_count(opFile, -1);
-	while(bytesRead <= streamSize)
-	{
-		int16_t pcm[5760];
-		int32_t read = op_read(opFile, pcm, 5760, nullptr);
-		if(read == 0) break;
-		bytesRead += read;
-		out.samples.resize((size_t)read);
-		memcpy(&out.samples[out.samples.size() - read], pcm, (size_t)read);
-	}
-	op_free(opFile);
-	/*if(out.samples.size() != (size_t)streamSize)
-	{
-		printf("Opus Decoder: Didn't receive the expected amount of data %s\n", fileName.data());
-		return AudioInfo{std::vector<int16_t>{}, 0, 0, 0, AudioFormat::NONE};
-	}*/
-	out.format = AudioFormat::OPUS;
-	out.bitsPerSample = 16;
-	out.sampleRate = 48000;
-	return out;
 }

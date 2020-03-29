@@ -1,17 +1,18 @@
 #include "loft.hh"
-#include "def.hh"
 #include "global.hh"
 
 #include <chrono>
 #include <commons/logger.hh>
 #include <commons/misc.hh>
+#include <commons/fileio.hh>
 
 int main()
 {
 	UP<Loft> loft = nullptr;
 	
 	loft = Loft::create(800, 600, "Loft Engine", false, false);
-	logger.setOptions(LoggerOptions{LogTarget::FILE, LogStamping::TIMESTAMPS, LogVerbosity::HIGH, getCWD() + "out/log.txt", false, true});
+	createDirectory(getCWD() + "out");
+	logger.setOptions(LoggerOptions{LogTarget::STDOUT, LogStamping::TIMESTAMPS, LogVerbosity::HIGH, getCWD() + "out/log.txt", false, true});
 	
 	loft->input->bindTriggerModeKey(Key::KEY_ESC, [&loft] (bool down)
 	{
@@ -19,7 +20,7 @@ int main()
 	});
 	
 	loft->renderer->setClearColor(0.0f, 0.01f, 0.05f, 0.0f);
-	loft->renderer->setCullFace(false);
+	loft->renderer->setCullFace(true);
 	
 	//Register event handlers
 	loft->eventBus->registerEventHandler<EventMouseButton>([] (bool down, uint8_t button)
@@ -56,14 +57,12 @@ int main()
 		accumulation += delta;
 		prev = now;
 		double targetFrameTime = 1.0 / (double)loft->updateRate;
-		
 		if(accumulation >= targetFrameTime)
 		{
 			deltaT = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - prevFrame).count();
 			if(deltaT > 1.0 / loft->minFPS) deltaT = 1.0 / loft->minFPS;
 			accumulation -= targetFrameTime;
 			prevFrame = now;
-			
 			loft->input->updateImmediateModeKbd(deltaT);
 			while(SDL_PollEvent(&event) != 0)
 			{
@@ -99,10 +98,9 @@ int main()
 					default: break;
 				}
 			}
-			//Update the active scene, camera, entities, etc
+			loft->eventBus->post<EventPreUpdate>();
 			loft->update(deltaT);
-			
-			//Rendering
+			loft->eventBus->post<EventPostUpdate>();
 			loft->eventBus->post<EventPrerender>();
 			loft->renderFrame();
 			loft->eventBus->post<EventPostrender>();
@@ -111,4 +109,5 @@ int main()
 	} while(!loft->exiting);
 	loft->eventBus->post<EventExiting>();
 	loft.reset();
+	return 0;
 }

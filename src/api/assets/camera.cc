@@ -9,12 +9,12 @@ void Camera::update()
 	}
 }
 
-mat4x4<float> Camera::getViewMatrix()
+mat4x4<float> Camera::getViewMatrix() const
 {
 	return viewMatrix<float>(quat<float>{this->rot}, vec3<float>{this->pos});
 }
 
-mat4x4<float> Camera::getOrthoProjectionMatrix()
+mat4x4<float> Camera::getOrthoProjectionMatrix() const
 {
 	return orthoProjectionMatrix<float>(0, this->viewSize.x(), this->viewSize.y(), 0, this->nearPlane, this->farPlane);
 }

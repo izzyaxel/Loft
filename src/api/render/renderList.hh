@@ -37,6 +37,11 @@ struct RenderList
 		this->list.insert(this->list.end(), renderables.begin(), renderables.end());
 	}
 	
+	inline void add(Renderable const &renderable)
+	{
+		this->list.push_back(renderable);
+	}
+	
 	inline void clear()
 	{
 		this->list.clear();

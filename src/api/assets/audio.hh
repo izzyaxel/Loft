@@ -13,8 +13,7 @@ enum struct AudioFormat
 {
 	NONE = 0,
 	OGG = 1,
-	OPUS = 2,
-	WAVE = 3,
+	WAVE = 2,
 };
 
 struct AudioInfo
