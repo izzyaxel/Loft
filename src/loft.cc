@@ -114,6 +114,6 @@ void Loft::update(double delta)
 
 void Loft::renderFrame()
 {
-	this->renderer->render({}, this->camera);
+	this->renderer->render(this->world.getSceneGraph(), this->camera);
 	SDL_GL_SwapWindow(reinterpret_cast<SDL_Window*>(this->window));
 }

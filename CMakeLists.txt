@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 if(WIN32 OR WIN64)
 	add_definitions(-DWINDOWS)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -std=c++17 -Wall -Wextra -Wpedantic -Wformat-security -Wno-unused")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -Wall -Wextra -Wpedantic -Wformat-security -Wno-unused")
 	if(CMAKE_BUILD_TYPE MATCHES Release)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_FORTIFY_SOURCE=2 -mmitigate-rop -fPIE")
 		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mwindows -Wl,--high-entropy-va -Wl,--dynamicbase -Wl,--nxcompat -s")
