@@ -2,6 +2,7 @@
 
 #include <commons/events.hh>
 #include <SDL2/SDL_events.h>
+#include <string>
 
 template <typename ... Args> struct EventBase : public std::function<void(Args ...)>
 {
